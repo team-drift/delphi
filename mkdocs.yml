@@ -1,7 +1,6 @@
-site_name: MkLorum
+site_name: DRIFT Documentation
 site_url: https://example.com/
 nav:
   - Home: index.md
-  - About: about.md
   - Kinematic Model: kinematic_model.md
 theme: readthedocs

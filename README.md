@@ -1,7 +1,7 @@
 # delphi
 Documentation for relevant repositories to LEADS.
 
-Once documentation updating automation is complete, `delphi` will be deployed. 
+*Note to developers*: Do NOT directly edit documentation within this repository. 
 
 ## Table of Contents
 
