@@ -30,3 +30,7 @@ jobs:
         git config --global user.email 'linganda@msu.edu'
         git commit -am "Update documentation" || true
         git push
+
+    - name: Deploy to GitHub Pages
+      run: |
+        mkdocs gh-deploy --force
