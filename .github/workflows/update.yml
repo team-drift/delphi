@@ -20,6 +20,8 @@ jobs:
       uses: actions/setup-python@v2
 
     - name: Update Documentation
+      env:
+        PTU_SDK_PAT: ${{ secrets.PTU_SDK_PAT }}
       run: |
         chmod +x ./update.sh
         ./update.sh
