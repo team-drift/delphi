@@ -2,5 +2,8 @@ site_name: DRIFT Documentation
 site_url: https://example.com/
 nav:
   - Home: index.md
-  - Kinematic Model: kinematic_model.md
+  - Telemetry Stream: telemetry-stream.md
+  - Ardupilot Logs Parsing: ardupilot-logs-parsing.md
+  - Kinematic Model: kinematic-model.md
+  - PTU-SDK: PTU-SDK.md
 theme: readthedocs
