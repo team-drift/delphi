@@ -74,7 +74,7 @@ The other directories are described below:
 The directories to keep in mind are `include/`, `src/`, and `utils/drift`.
 All others are either automatically generated or are not meant to be changed,
 as we are striving to keep the provided base components static as much as possible.
-Any new components are alterations can be be done in the three directories specified most of the time!
+Any new components and alterations can be be done in the three directories specified most of the time!
 
 ### CMake Structure
 
@@ -129,7 +129,7 @@ make dptu
 ```
 
 Any dependencies will be automatically built for you,
-so don't worry about building any dependencies.
+so don't worry about building any parents.
 
 5. Locate your build
 
@@ -195,10 +195,23 @@ This will also require the receiver to have build tools installed,
 such as CMake and a compiler (gcc/clang), which may be trivial or very difficult
 to install depending on your platform.
 
+Source distributions have extension of type `.tar.gz`
+
 ### Wheel Distribution
 
 A so-called 'wheel' is a type of Python package that contains a pre-built module.
+Wheels are very useful as they do not require a build operation before installing,
+so any receivers of the wheel can utilize the package immediately and do not require any build tools to be installed.
 
+The downside is that the wheel can only be used on the platform it was built on.
+For example, if a wheel is built on Linux, it is only possible
+to install and use the wheel on Linux platforms.
+A windows user could not use such a wheel.
+While it is possible to cross-build wheels for other platforms,
+it is not recommended to do so as this introduces a lot of complexity.
+So, you probably will not be distributing the wheel to others.
+
+Wheel distributions have extension of type `.whl`
 
 ## Development Environment
 
@@ -227,3 +240,92 @@ Alongside these extensions, we suggest the following changes:
 - `C_Cpp.codeAnalysis.clangTidy.useBuildPath = true` - Instructs clang-tidy to utilize CMake `compile-commands.json`
 
 This will allow VSCode to build and analyze this project for you!
+
+## Code Components
+
+This section will describe the files that make up this project.
+Most of the code is already documented in the source!
+All functions/components have docstrings that describe their usage and behavior,
+and all code is well commented.
+However, this section will offer a high level view of the codebase.
+
+This project uses the conventional C++ project format,
+a collection of header files that each have a source file.
+The header files each contain components that do a specific thing.
+We will go over each file and go over the broad details:
+
+```
+include/
+└── dptu
+    ├── comwrap.hpp
+    ├── entry.hpp
+    ├── init.hpp
+    └── trans.hpp
+```
+
+### init
+
+The `init.hpp` header contains components for creating and destroying a 'harness',
+which is a structure that contains the necessary information for communicating with the gimbal.
+The nature of this structure will not be discussed here
+(you may look into the base SDK code if you are curious),
+as it is not important for gimbal usage.
+
+The creation process, done via `init_harness()` will allocate
+and configure the harness for operation.
+The destruction process, done via `close_harness()` will
+close the harness and free any memory.
+
+It is REQUIRED for all operations to use these methods
+for creating and destroying the harness!
+Failing to do either operations can cause bugs and trouble!
+Most features the DRIFT wrapper provides are optional and can be ignored,
+but this operation is required!
+
+### comwrap
+
+The `comwrap.hpp` header contains components for wrapping certain SDK operations.
+The procedure for sending a command to the gimbal via the base sdk
+is somewhat complicated and weird.
+So, one of the major goals of this project is to simplify operations
+and this header defines components that do just that.
+
+Most of the functions in this header are simple and self explanatory,
+such as `ptu_go_to()`, that sends the gimbal to the provided position.
+All of these functions are documented in source, so we will not cover most of these.
+
+However, there are two functions that simplify certain operations.
+First, `prep_start()` will prepare the gimbal for operation.
+When booting, the gimbal may be in an undesirable state.
+For example, the axis speed will be zero positions per second,
+so any move commands will do nothing.
+This function sets the gimbal to a standard state that will prepare the gimbal for operation.
+Ideally, this should be executed before any other unit commands.
+
+The `prep_stop()` function does the opposite,
+it prepares the unit for shutdown.
+This ensures the gimbal will be in a safe state,
+and will not move out of this position before the gimbal is powered off.
+Ideally, this should be the last gimbal operation you preform before shutdown,
+as any commands issued after this one will not be acknowledged.
+If you have stopped the gimbal, you may start it again by using the `prep_start()` method,
+which will place the gimbal into the initial start state, allowing the gimbal to respond to commands once more.
+
+### entry
+
+The `entry.hpp` header contains easy to use entry points into the project.
+It consists of a class, `PTUPoint`, that will handle starting, stopping,
+translating, and pointing at certain positions.
+This class is primarily used in the python wrappers,
+as it greatly simplifies the binding operation.
+
+### trans
+
+The `trans.hpp` header contains components for translating positions into gimbal rotations in both axis.
+We are given positions in North, East, Up coordinates,
+which are the distance in meters from the origin point in each respective axis.
+In all cases, we assume the gimbal is the origin of the system.
+
+These functions translate these positions into rotations that the gimbal can work with.
+The details of these functions can be found in the docstrings and the source.
+You can see `entry.cpp` for an example of how to use these components.
