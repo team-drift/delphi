@@ -1,0 +1,18 @@
+This is documentation on running the drone 
+
+-speed controllers are in the plane 
+-blue board power dist
+-rc transmitter
+-antenna  
+-gps is separate from the box
+
+mission controller-base station 
+
+so just plug in the battery to the drone and gps
+
+-go to communications links and either press auto or com3
+-don’t go to actions 
+-status page gives you data points for any parameter you want to recieve
+	-lat and lng
+
+navlink and com port
