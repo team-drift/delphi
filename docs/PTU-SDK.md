@@ -316,6 +316,9 @@ which will place the gimbal into the initial start state, allowing the gimbal to
 The `entry.hpp` header contains easy to use entry points into the project.
 It consists of a class, `PTUPoint`, that will handle starting, stopping,
 translating, and pointing at certain positions.
+This class will also determine if you are attempting to seek
+to a position that is out of range,
+and will simply do nothing in such a scenario.
 This class is primarily used in the python wrappers,
 as it greatly simplifies the binding operation.
 
