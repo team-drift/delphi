@@ -203,11 +203,12 @@ A so-called 'wheel' is a type of Python package that contains a pre-built module
 Wheels are very useful as they do not require a build operation before installing,
 so any receivers of the wheel can utilize the package immediately and do not require any build tools to be installed.
 
-The downside is that the wheel can only be used on the platform it was built on.
+The downside is that the wheel can only be used on the platform and architecture it was built on.
 For example, if a wheel is built on Linux, it is only possible
 to install and use the wheel on Linux platforms.
-A windows user could not use such a wheel.
-While it is possible to cross-build wheels for other platforms,
+A windows user could not use such a wheel,
+and an ARM CPU could not utilize a x86_64 wheel.
+While it is possible to cross-build wheels for other platforms/architectures,
 it is not recommended to do so as this introduces a lot of complexity.
 So, you probably will not be distributing the wheel to others.
 
@@ -218,7 +219,7 @@ Wheel distributions have extension of type `.whl`
 Developers may work on the project using any tools they like!
 It is possible to work with this project with nothing more than a text editor,
 given that you have the requirements satisfied in the tech stack portion of this document.
-However, this is not recommended, so we will provide a minimum development environment recommendation
+However, this is not recommended, so we will provide a minimum development environment recommendation.
 
 VSCode is the recommended IDE for this project!
 It is highly configurable and offers all the features you could want.
