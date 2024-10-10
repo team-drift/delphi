@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://example.com/PTU-SDK/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>PTU-SDK - DRIFT Documentation</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "PTU-SDK";
+        var mkdocs_page_input_path = "PTU-SDK.md";
+        var mkdocs_page_url = "/PTU-SDK/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> DRIFT Documentation
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../telemetry-stream/">Telemetry Stream</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../ardupilot-logs-parsing/">Ardupilot Logs Parsing</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../kinematic-model/">Kinematic Model</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">PTU-SDK</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#project-stack">Project Stack</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#project-structure">Project Structure</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#file-structure">File Structure</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#cmake-structure">CMake Structure</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#cmake">CMake</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#python">Python</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#source-distribution">Source Distribution</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#wheel-distribution">Wheel Distribution</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#development-environment">Development Environment</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#code-components">Code Components</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#init">init</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#comwrap">comwrap</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#entry">entry</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#trans">trans</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">DRIFT Documentation</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">PTU-SDK</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="ptu-sdk">PTU-SDK</h1>
+<p>PTU-SDK is an SDK provided by FLIR -- with additional utilities/wrappers written by DRIFT -- necessary to control the gimbal. </p>
+<p>In this documentation, we outline how the PTU-SDK works and how to use it.</p>
+<h2 id="project-stack">Project Stack</h2>
+<p>This project is written in the <code>C++17</code> standard,
+and utilizes the following components:</p>
+<ul>
+<li>FLiR Base PTU-SDK - The base sdk as provided by FLiR, which facilitates low-level communication with the gimbal<ul>
+<li>FLiR Cerial Library - A networking library used by the base sdk</li>
+</ul>
+</li>
+<li>PyBind11 - A library for easily creating python bindings for C++</li>
+<li>Python Setuptools - A python build system for creating python modules from this project</li>
+<li>CMake - Building all components of the sdk</li>
+<li>clang-tidy - Checks and linting to ensure code quality</li>
+<li>clang-format - Formatting rules for the project</li>
+<li>gcc/clang - Either compiler can be utilized depending on developer preference</li>
+</ul>
+<p>Of these components, CMake, gcc/clang, and Python are REQUIRED for building this project!
+The rest are either provided with the project, or are optional.</p>
+<h2 id="project-structure">Project Structure</h2>
+<p>This section describes the outline of the project,
+which includes the physical layout of the project files,
+CMake build targets, and how components in this project interact.</p>
+<h3 id="file-structure">File Structure</h3>
+<p>This project has the following outline:</p>
+<pre><code>PTU-SDK/
+├── build
+├── dist
+├── docs
+├── include
+│   └── dptu
+├── libs
+│   └── ptu-sdk
+│       └── cerial
+├── python
+│   └── pdptu
+├── src
+└── utils
+    ├── drift
+    └── sdk-examples
+</code></pre>
+<p>Some of these directories will NOT be included in version control,
+so they may not be present in a fresh clone.
+All these directories will be auto-generated in one way or another
+if you preform the operations outlined in the documentation.
+Directories not included in version control are:</p>
+<ul>
+<li>build - CMake generated build files, your final build binaries will be placed here when building with CMake!</li>
+<li>dist - Final Python source distributions / wheels that are built via setuptools</li>
+</ul>
+<p>The other directories are described below:</p>
+<ul>
+<li>docs - Contains documentation for this project</li>
+<li>include - Header files for custom libraries created for this project<ul>
+<li>dptu - header files for the drift PTU sdk</li>
+</ul>
+</li>
+<li>src - Source files for custom libraries created for this project</li>
+<li>python - Python bindings for the drift PTU sdk</li>
+<li>utils - Development/testing utilities to simplify certain gimbal operations<ul>
+<li>drift - Utilities produced by drift</li>
+<li>sdk-examples - Utilities provided with the base sdk, these are unaltered</li>
+</ul>
+</li>
+<li>libs - External libraries vendored with this project. Required for building any project components<ul>
+<li>ptu-sdk - The provided base sdk, mostly unaltered<ul>
+<li>cerial - 'Cerial' library utilized by the base sdk, mostly unaltered</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>The directories to keep in mind are <code>include/</code>, <code>src/</code>, and <code>utils/drift</code>.
+All others are either automatically generated or are not meant to be changed,
+as we are striving to keep the provided base components static as much as possible.
+Any new components and alterations can be be done in the three directories specified most of the time!</p>
+<h3 id="cmake-structure">CMake Structure</h3>
+<p>This project uses CMake in all build scenarios!
+All components in this project are CMake enabled,
+allowing most operations to be done via CMake.
+This project defines many targets that can be built,
+but most of the time you only want to focus on a few
+Below is a outline of the targets, children of a target depends on them:</p>
+<pre><code>cerial
+└── ptusdk
+    ├── dptu
+    │   ├── driftutil
+    │   └── pdptu
+    └── sdkexamples
+</code></pre>
+<ul>
+<li>cerial - Networking library required by the base sdk</li>
+<li>ptusdk - Provided base sdk library</li>
+<li>sdkexamples - Builds ALL provided base sdk example binaries, can be executed</li>
+<li>dptu - DRIFT wrapper library around the base sdk</li>
+<li>driftutil - Builds ALL DRIFT utility binaries, can be executed</li>
+<li>pdptu - Python bindings for dptu as a shared library. Building this yourself is usually not required, see the python section</li>
+</ul>
+<h2 id="cmake">CMake</h2>
+<p>As mentioned earlier in this document, this project is build via <a href="https://cmake.org/">CMake</a>.
+It is recommended to handle this process through your IDE,
+but it is possible to do so manually.</p>
+<p>Build Steps:</p>
+<ol>
+<li>Create a build directory: <code>mkdir build</code></li>
+<li>Navigate to build directory: <code>cd build/</code></li>
+<li>Invoke CMake to configure the project: <code>cmake ..</code></li>
+</ol>
+<p>After the project has been configured, you will see the <code>build</code>
+directory has been populated with many files!
+Pretty much all of these can be ignored, but later down the line
+we will outline some files that are relevant.</p>
+<ol>
+<li>Build your target: <code>make [TARGET]</code></li>
+</ol>
+<p>Where <code>[TARGET]</code> is the name of the target you wish to build.
+You can see a list of targets above in the CMake Structure section.
+For example, if you wish to build the <code>dptu</code> target:</p>
+<pre><code class="language-bash">make dptu
+</code></pre>
+<p>Any dependencies will be automatically built for you,
+so don't worry about building any parents.</p>
+<ol>
+<li>Locate your build</li>
+</ol>
+<p>If you are building a library, it will be in format <code>.a</code> for a static library,
+or <code>.so</code> for a shared library. Unless you are building the python bindings,
+all libraries built by this project are static, and will have filetype <code>.a</code>.</p>
+<p>Executables have varying filetypes. On Unix like systems,
+they will not have a file extension.
+On Windows, they will have a <code>.exe</code> extension.</p>
+<p>CMake organizes the <code>build</code> directory in the same way the project is structured.
+This means it places binaries in locations that are comparable to that of the project.
+For example, if you build the <code>demo</code> executable,
+you can find it in:</p>
+<pre><code>build/utils/drift/demo
+</code></pre>
+<p>The same goes for other components, simply follow the directories to locate your binary.
+Once you have located your binary, you can move it to wherever you like!
+From there, you can utilize it as you see fit.</p>
+<p>If you experience any strange errors,
+or mess up the state of the build system,
+then you can safely delete the build directory and restart.
+The build directory does not contain any valuable information!
+So deleting and reconfiguring has no large consequences,
+other than the time that is required to re-create and re-build any components.</p>
+<h2 id="python">Python</h2>
+<p>This project also contains Python bindings that allow
+this code to be worked with and utilized in Python!
+This is done via <a href="https://github.com/pybind/pybind11">PyBind11</a>,
+which greatly simplifies this procedure.
+PyBind11 is automatically fetched by CMake at configure time,
+so it is not necessary to install this dependency system wide!
+Here are the steps to build the python module:</p>
+<ol>
+<li>First, create a python virtual environment: <code>python -m venv venv/</code></li>
+<li>Activate the virtual environment: <code>source venv/bin/activate</code></li>
+<li>Next, install build tools: <code>pip install build</code></li>
+<li>Invoke the build system: <code>python -m build</code></li>
+</ol>
+<p>From here, it will build your python module and place it into the <code>dist/</code> directory.
+This command will create two types of distributions, which we will cover below.</p>
+<h3 id="source-distribution">Source Distribution</h3>
+<p>A source distribution is a Python package that contains
+the files necessary to build your Python module.
+When asked to install this package,
+Python will use the contents to build the module for the system it is running on.
+This is the recommended way to distribute the Python module!
+It is best to have other developers build the module from scratch on their own systems,
+instead of having to worry about platform differences and cross-compilation.</p>
+<p>The downside to this approach is that source distributions require extra time
+to install on the end of the receiver, as they will need to build the module themselves.
+This will also require the receiver to have build tools installed,
+such as CMake and a compiler (gcc/clang), which may be trivial or very difficult
+to install depending on your platform.</p>
+<p>Source distributions have extension of type <code>.tar.gz</code></p>
+<h3 id="wheel-distribution">Wheel Distribution</h3>
+<p>A so-called 'wheel' is a type of Python package that contains a pre-built module.
+Wheels are very useful as they do not require a build operation before installing,
+so any receivers of the wheel can utilize the package immediately and do not require any build tools to be installed.</p>
+<p>The downside is that the wheel can only be used on the platform and architecture it was built on.
+For example, if a wheel is built on Linux, it is only possible
+to install and use the wheel on Linux platforms.
+A windows user could not use such a wheel,
+and an ARM CPU could not utilize a x86_64 wheel.
+While it is possible to cross-build wheels for other platforms/architectures,
+it is not recommended to do so as this introduces a lot of complexity.
+So, you probably will not be distributing the wheel to others.</p>
+<p>Wheel distributions have extension of type <code>.whl</code></p>
+<h2 id="development-environment">Development Environment</h2>
+<p>Developers may work on the project using any tools they like!
+It is possible to work with this project with nothing more than a text editor,
+given that you have the requirements satisfied in the tech stack portion of this document.
+However, this is not recommended, so we will provide a minimum development environment recommendation.</p>
+<p>VSCode is the recommended IDE for this project!
+It is highly configurable and offers all the features you could want.
+Any IDE that has support for C++ and CMake would suffice (such as CLion),
+but we will focus on VSCode in this section.</p>
+<p>Alongside VSCode, you will want the following extensions:</p>
+<ul>
+<li><a href="https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools">C/C++</a> - Enables C/C++ Development in VSCode</li>
+<li><a href="https://marketplace.visualstudio.com/items?itemName=ms-vscode.cmake-tools">CMake Tools</a> - Adds support for CMake enabled projects</li>
+<li><a href="https://marketplace.visualstudio.com/items?itemName=cschlosser.doxdocgen">Doxygen Generator</a> - Simplifies the process of creating doxygen documentation</li>
+</ul>
+<p>These extensions are the bare minimum, and it is recommended to install other extensions
+that enhance your workflow, such as the GitHub integration extension.</p>
+<p>Alongside these extensions, we suggest the following changes:</p>
+<ul>
+<li><code>C_Cpp.codeAnalysis.clangTidy.enabled = true</code> - Enables clang-tidy checks to be preformed by VSCode</li>
+<li><code>C_Cpp.codeAnalysis.clangTidy.useBuildPath = true</code> - Instructs clang-tidy to utilize CMake <code>compile-commands.json</code></li>
+</ul>
+<p>This will allow VSCode to build and analyze this project for you!</p>
+<h2 id="code-components">Code Components</h2>
+<p>This section will describe the files that make up this project.
+Most of the code is already documented in the source!
+All functions/components have docstrings that describe their usage and behavior,
+and all code is well commented.
+However, this section will offer a high level view of the codebase.</p>
+<p>This project uses the conventional C++ project format,
+a collection of header files that each have a source file.
+The header files each contain components that do a specific thing.
+We will go over each file and go over the broad details:</p>
+<pre><code>include/
+└── dptu
+    ├── comwrap.hpp
+    ├── entry.hpp
+    ├── init.hpp
+    └── trans.hpp
+</code></pre>
+<h3 id="init">init</h3>
+<p>The <code>init.hpp</code> header contains components for creating and destroying a 'harness',
+which is a structure that contains the necessary information for communicating with the gimbal.
+The nature of this structure will not be discussed here
+(you may look into the base SDK code if you are curious),
+as it is not important for gimbal usage.</p>
+<p>The creation process, done via <code>init_harness()</code> will allocate
+and configure the harness for operation.
+The destruction process, done via <code>close_harness()</code> will
+close the harness and free any memory.</p>
+<p>It is REQUIRED for all operations to use these methods
+for creating and destroying the harness!
+Failing to do either operations can cause bugs and trouble!
+Most features the DRIFT wrapper provides are optional and can be ignored,
+but this operation is required!</p>
+<h3 id="comwrap">comwrap</h3>
+<p>The <code>comwrap.hpp</code> header contains components for wrapping certain SDK operations.
+The procedure for sending a command to the gimbal via the base sdk
+is somewhat complicated and weird.
+So, one of the major goals of this project is to simplify operations
+and this header defines components that do just that.</p>
+<p>Most of the functions in this header are simple and self explanatory,
+such as <code>ptu_go_to()</code>, that sends the gimbal to the provided position.
+All of these functions are documented in source, so we will not cover most of these.</p>
+<p>However, there are two functions that simplify certain operations.
+First, <code>prep_start()</code> will prepare the gimbal for operation.
+When booting, the gimbal may be in an undesirable state.
+For example, the axis speed will be zero positions per second,
+so any move commands will do nothing.
+This function sets the gimbal to a standard state that will prepare the gimbal for operation.
+Ideally, this should be executed before any other unit commands.</p>
+<p>The <code>prep_stop()</code> function does the opposite,
+it prepares the unit for shutdown.
+This ensures the gimbal will be in a safe state,
+and will not move out of this position before the gimbal is powered off.
+Ideally, this should be the last gimbal operation you preform before shutdown,
+as any commands issued after this one will not be acknowledged.
+If you have stopped the gimbal, you may start it again by using the <code>prep_start()</code> method,
+which will place the gimbal into the initial start state, allowing the gimbal to respond to commands once more.</p>
+<h3 id="entry">entry</h3>
+<p>The <code>entry.hpp</code> header contains easy to use entry points into the project.
+It consists of a class, <code>PTUPoint</code>, that will handle starting, stopping,
+translating, and pointing at certain positions.
+This class will also determine if you are attempting to seek
+to a position that is out of range,
+and will simply do nothing in such a scenario.
+This class is primarily used in the python wrappers,
+as it greatly simplifies the binding operation.</p>
+<h3 id="trans">trans</h3>
+<p>The <code>trans.hpp</code> header contains components for translating positions into gimbal rotations in both axis.
+We are given positions in North, East, Up coordinates,
+which are the distance in meters from the origin point in each respective axis.
+In all cases, we assume the gimbal is the origin of the system.</p>
+<p>These functions translate these positions into rotations that the gimbal can work with.
+The details of these functions can be found in the docstrings and the source.
+You can see <code>entry.cpp</code> for an example of how to use these components.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../kinematic-model/" class="btn btn-neutral float-left" title="Kinematic Model"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../kinematic-model/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
