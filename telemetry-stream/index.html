@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://example.com/telemetry-stream/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Telemetry Stream - DRIFT Documentation</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Telemetry Stream";
+        var mkdocs_page_input_path = "telemetry-stream.md";
+        var mkdocs_page_url = "/telemetry-stream/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> DRIFT Documentation
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">Telemetry Stream</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#telemetry_streamcpp">telemetry_stream.cpp</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#deprecated">deprecated</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#prior-knowledge">Prior Knowledge</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#mavsdk-setup">MAVSDK Setup</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#test-simulation">Test Simulation</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#additional-steps-for-arm-architectureapple-silicon">Additional Steps for ARM Architecture/Apple Silicon</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#how-to-use-telemetry_streamcpp">How to use telemetry_stream.cpp</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#installations">Installations</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#run-telemetry_streamcpp">Run telemetry_stream.cpp</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#run-the-maincpp">Run the main.cpp</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../ardupilot-logs-parsing/">Ardupilot Logs Parsing</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../kinematic-model/">Kinematic Model</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../PTU-SDK/">PTU-SDK</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">DRIFT Documentation</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Telemetry Stream</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="telemetry-stream">Telemetry Stream</h1>
+<p><code>telemetry-stream</code> is responsible for streaming telemetry data from the drone we are tracking to our <a href="https://team-drift.github.io/delphi/kinematic_model/"><code>kinematic-model</code></a> which will then perform the necessary calculations needed by <a href="https://team-drift.github.io/delphi/PTU-SDK/"><code>PTU-SDK</code></a> to move the gimbal controlling the laser. </p>
+<p>In this documentation, we (will) outline what is inside <code>telemetry-stream</code>, how <code>telemetry-stream</code> works, and more importantly how to use it. </p>
+<h2 id="telemetry_streamcpp"><code>telemetry_stream.cpp</code></h2>
+<p><em>As of 03/13/2024, <code>telemetry_stream.cpp</code> is functional.</em> </p>
+<p>We are currently working on streaming the specific fields needed by <code>DAM</code>. For now, we are streaming altitude only.</p>
+<p>This is a C++ implementation for streaming telemetry data. We primarily utilize <a href="https://mavsdk.mavlink.io/main/en/"><code>MAVSDK</code></a>, a higher level API <a href="https://mavlink.io/en/about/implementations.html">"that aims to be fully standards-compliant with MAVLink common microservices"</a> such as telemetry, hence why we opted for it. There is no reason not to re-use already fast (C++) code that's already been written for this "basic" functionality (unless <code>MAVSDK</code> loses the wide community support it has as of today).</p>
+<h2 id="deprecated"><code>deprecated</code></h2>
+<p>The <code>deprecated</code> folder contains a python implementation for telemetry streaming which heavily utilizes <a href="https://github.com/ArduPilot/pymavlink"><code>pymavlink</code></a>. Though still functional, we opted to refactor in C++ as performance must be optimized.</p>
+<h2 id="prior-knowledge">Prior Knowledge</h2>
+<p>Read the following pieces of documentation (in a <em>BFS</em> manner) before developing: </p>
+<ol>
+<li>
+<p><a href="https://mavlink.io/en/">MAVLink</a>: read the <code>Introduction</code> section and its subsections</p>
+</li>
+<li>
+<p><a href="https://mavsdk.mavlink.io/main/en/">MAVSDK</a>: read the <code>Introduction</code> and <code>C++</code> sections, but do not start the <code>Quickstart</code> section yet</p>
+</li>
+<li>
+<p><a href="https://mavsdk.mavlink.io/main/en/cpp/guide/telemetry.html">Telemetry Guide</a></p>
+</li>
+<li>
+<p><a href="https://mavsdk.mavlink.io/main/en/cpp/api_reference/structmavsdk_1_1_telemetry_1_1_acceleration_frd.html">Telemetry Class</a></p>
+</li>
+<li>
+<p><a href="https://github.com/mavlink/MAVSDK/issues/2221">Discrepancies</a>: always watch out for discrepancies between the actual documentation and example code provided by a given tool. However, you should always reference both.</p>
+</li>
+</ol>
+<h2 id="mavsdk-setup">MAVSDK Setup</h2>
+<p>To begin developing, read the notes below as you follow the whole <a href="https://mavsdk.mavlink.io/main/en/cpp/quickstart.html?q=">C++ Quickstart</a> for your machine's OS.</p>
+<p>After the <a href="https://mavsdk.mavlink.io/main/en/cpp/quickstart.html#install-mavsdk-library">Install MAVSDK library</a> section, check its version. For example, if you're on macOS, then <code>brew info mavsdk</code>. You may run into a versioning discrepancy issue between the <code>mavsdk</code> library installed during the Install MAVSDK Library section and the <code>mavsdk</code> repository in the <a href="https://mavsdk.mavlink.io/main/en/cpp/quickstart.html#build_examples">Build and Try Example</a> section. </p>
+<p>If the versions between the library and the repository differ, simply pull the whole version of the repo that matches the library, or alternatively  copy and paste the <code>takeoff_and_land</code> example code from the version of the repo that matches the library. To switch to the appropiate version of the MAVSDK repo: 
+1. go to the <a href="https://github.com/mavlink/MAVSDK">MAVSDK repository</a> 
+2. Click on "main" -&gt; "Tags"
+3. Select the appropriate version</p>
+<p>Once you reach the <code>Setting up a Simulator</code> subsection, refer to "Test Simulation" within this documentation page.</p>
+<!-- If you do the latter, you will find a toggle button dedicated to "Apple M1 Macbook users" instructing them to essentially make an x86 terminal. However, it is not possible to duplicate a terminal for OS versions Ventura and beyond. Fortunately, there is [a great workaround](https://stackoverflow.com/questions/74198234/duplication-of-terminal-in-macos-ventura).  -->
+
+<h2 id="test-simulation">Test Simulation</h2>
+<ol>
+<li>
+<p>Download <a href="http://qgroundcontrol.com/downloads/">QGroundControl</a> and simply open it.</p>
+</li>
+<li>
+<p>Download PX-4 and build the simulation.</p>
+<p>Open a terminal. Run the following:
+<code>git clone https://github.com/PX4/PX4-Autopilot.git --recursive
+cd PX4-Autopilot
+make px4_sitl jmavsim</code></p>
+</li>
+<li>
+<p>Ensure Proper Configurations </p>
+<p>Ensure QGroundControl ports and \&lt;insert testing file from <code>MAVSDK</code> repo such as <code>takeoff_and_land.cpp</code>&gt; ports are set to <code>14540</code> (Or, whatever port we want. Just have it be uniform.)</p>
+<p>Go to the top left of QGroundCountrol -&gt; Application Settings -&gt; MAVLink, and check if the hostname is <code>localhost:14445</code></p>
+</li>
+<li>
+<p>Start up the simulation </p>
+<p>Simply follow the rest of the instructions outlined <a href="https://mavsdk.mavlink.io/main/en/cpp/quickstart.html#build_examples">here</a>.</p>
+</li>
+</ol>
+<h3 id="additional-steps-for-arm-architectureapple-silicon">Additional Steps for ARM Architecture/Apple Silicon</h3>
+<ol>
+<li>Download Anaconda</li>
+<li>Create environment for x86_64 architecture <code>CONDA_SUBDIR=osx-64 conda create -n px4_x86 python=3.9</code></li>
+<li>Activate <code>conda activate px4_x86</code></li>
+<li>Set Environment <code>conda config --env --set subdir osx-64</code></li>
+</ol>
+<p>** JMavSim's GUI does not work within ARM, to run the simulation without a gui, <code>HEADLESS=1 make px4_sitl jmavsim</code></p>
+<h2 id="how-to-use-telemetry_streamcpp">How to use telemetry_stream.cpp</h2>
+<p>This section (will soon) outlines how to physically setup telemetry streaming from the drone to the ground station (us).</p>
+<p>Ensure you have completed ALL sections above beforehand.</p>
+<h3 id="installations">Installations</h3>
+<p>Run the command: </p>
+<p><code>brew install nlohmann-json</code></p>
+<p>You can use the <code>deprecrated/stream_data.py</code> as a quick validation that your <code>baud</code> and <code>connection_string</code> is correct. Simply plug in the aformentioned parameters into <code>stream_data.py</code> then run the file. </p>
+<p>Otherwise, you can follow the steps from "Test Simulation" to setup a simulated drone rather than a physical drone to verify telemetry data streaming is working.</p>
+<h3 id="run-telemetry_streamcpp">Run <code>telemetry_stream.cpp</code></h3>
+<ol>
+<li>Build the executable
+    <code>cmake -Bbuild -H.
+    cmake --build build -j8</code></li>
+<li>Run the executable
+    <code>build/telemetry_stream udp://:14540</code></li>
+</ol>
+<h3 id="run-the-maincpp">Run the <code>main.cpp</code></h3>
+<ol>
+<li>start up px4 jmav</li>
+<li>in this repo run the command:
+    ./telemetry-stream </li>
+</ol>
+<p>you can run 
+    commander takeoff
+    commander land</p>
+<p>this run <code>simulation.py</code> in agogos</p>
+<h1 id="python-bindings">Python Bindings</h1>
+<ol>
+<li>Excecute CMake file in the root directory with <code>cmake .</code></li>
+<li>Within /python_bindings, the module should be ready as a .so (shared object file)</li>
+<li>Within your Python File, you should know <code>import _telemetry_stream</code></li>
+</ol>
+<p>The Python File should be in the same directory as the .so file</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href=".." class="btn btn-neutral float-left" title="Home"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../ardupilot-logs-parsing/" class="btn btn-neutral float-right" title="Ardupilot Logs Parsing">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href=".." style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../ardupilot-logs-parsing/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
