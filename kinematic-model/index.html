@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://example.com/kinematic-model/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Kinematic Model - DRIFT Documentation</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Kinematic Model";
+        var mkdocs_page_input_path = "kinematic-model.md";
+        var mkdocs_page_url = "/kinematic-model/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> DRIFT Documentation
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../telemetry-stream/">Telemetry Stream</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../ardupilot-logs-parsing/">Ardupilot Logs Parsing</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">Kinematic Model</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#methodology">Methodology</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#data-preprocessing">Data Preprocessing</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#conversion-to-east-north-up-enu-coordinates">Conversion to East, North, Up (ENU) coordinates</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#kinematic-prediction">Kinematic Prediction</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#evaluation">Evaluation</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#what-these-distances-mean">What these distances mean</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#visualization">Visualization</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#fourier-transform-analysis">Fourier Transform Analysis</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../PTU-SDK/">PTU-SDK</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">DRIFT Documentation</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Kinematic Model</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="kinematic-model-of-a-moving-drones-telemetry-stream">Kinematic Model of a Moving Drone's Telemetry Stream</h1>
+<p>This notebook represents a kinematic model of telemetry data from a moving drone. A kinematic model describes the movement of objects using variables such as position, velocity, and acceleration, without considering the underlying forces that cause the motion. In this case, we are predicting the next position of the drone based on its current position and velocity.</p>
+<h2 id="methodology">Methodology</h2>
+<h3 id="data-preprocessing">Data Preprocessing</h3>
+<p>The first step of the notebook is the data preprocessing, where the mavlink data of the drone and the ground control station (GCS) are loaded. We add a prefix to their packet type to be easily identified (UAV_/GCS_). The <code>time_boot_ms</code> column which provides the system time since boot, is normalized by the minimum time to start the timestamp from zero. All of them are then combined into one dataframe, sorted by time in ascending order, and some columns are converted into their correct units.</p>
+<h3 id="conversion-to-east-north-up-enu-coordinates">Conversion to East, North, Up (ENU) coordinates</h3>
+<p>In the field of aerial vehicles, including drones, a common coordinate system used is the East, North, Up (ENU) system. In this system:</p>
+<ul>
+<li>The x-axis points towards the North.</li>
+<li>The y-axis points towards the East.</li>
+<li>The z-axis points Upwards.</li>
+</ul>
+<p>To transform the GPS (latitude, longitude, altitude) coordinates into ENU, we use the <code>geodetic2enu</code> function from the <code>pymap3d</code> library. The conversion needs a reference point, which is in this case the starting point of the drone.</p>
+<blockquote>
+<p>⚠️ E, N, U is not in the same order as X, Y, Z. The result of <code>pymap3d.geodetic2enu()</code> must be unpacked like <code>y, x, z = pymap3d.geodetic2enu()</code></p>
+</blockquote>
+<h3 id="kinematic-prediction">Kinematic Prediction</h3>
+<p>To predict the position of the drone in the next timestamp, we use a basic kinematic equation:</p>
+<p><code>position_next = position_current + velocity_current * time_to_next</code></p>
+<p>Where <code>time_to_next</code> is the difference in time between two consecutive timestamps. This equation assumes that the drone moves at a constant velocity, thus it's a simple approximation that does not consider any changes in velocity (acceleration).</p>
+<p>In this example, we are forecasting the drone's location for the upcoming timestamp. This allows us to compare our prediction with the actual reported location at that subsequent timestamp.</p>
+<h3 id="evaluation">Evaluation</h3>
+<p>The predictions are evaluated by calculating the Euclidean distance between the predicted and actual positions. The Euclidean distance between two points in 3D space is calculated as follows:</p>
+<p><code>distance = sqrt((x1-x2)^2 + (y1-y2)^2 + (z1-z2)^2)</code></p>
+<p>The distances are then converted into centimeters and visualized by a histogram.</p>
+<h4 id="what-these-distances-mean">What these distances mean</h4>
+<p>The distances calculated in this model represent the adjustments anticipated in real-time drone operations. Specifically, the gimbal on the drone will follow each predicted vector until it reaches the predicted location. Then it will need to "jump" to the next actual reported location. These 'jumps' are represented by the distances we have calculated. </p>
+<p>Assuming that the reported locations are completely accurate, these distances provide a good estimation of the potential error expected in the model. They could be used to inform the design parameters of the receiving device on the drone. However, it's important to consider some degree of error in the reported location data itself. Additionally, the mechanical inaccuracies or latency in the drone's pan-tilt unit can also contribute to the overall model error. Therefore, due to the combined implications of location data inaccuracies and the mechanical response of the drone's pan-tilt unit, the calculated error should not be solely used to determine the design requirements of the receiving device on the drone.</p>
+<h3 id="visualization">Visualization</h3>
+<p>Although drone motion in 3D space is best visualized with a 3D plot, 2D plots might be more convenient in some situations. Thus, both 3D and 2D plots are made, where each point corresponds to a timestamp, and a line is drawn to the point that represents the predicted position for the next timestamp.</p>
+<h3 id="fourier-transform-analysis">Fourier Transform Analysis</h3>
+<p>I used the Fourier Transform as a tool to analyze the inconsistency in the vertical velocity ('vz') of the drone. Initially, the error in the z-direction of the drone movement wasn't making sense, so I used the spectral analysis to examine the dominant frequencies that make up the 'vz' signal. On plotting these frequencies, I noticed a significant spike at approximately 1.2Hz.</p>
+<p>Interestingly, this dominant frequency at 1.2Hz matched the frequency observed from my smartphone's accelerometer while I was walking with the drone. In essence, the Fourier Transform helped me realize that the drone's vertical velocity was significantly influenced by my walking rhythm.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../ardupilot-logs-parsing/" class="btn btn-neutral float-left" title="Ardupilot Logs Parsing"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../PTU-SDK/" class="btn btn-neutral float-right" title="PTU-SDK">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../ardupilot-logs-parsing/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../PTU-SDK/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
